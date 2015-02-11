@@ -1,0 +1,88 @@
+﻿<Window x:Class="GestionStationnement.Views.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+		xmlns:viewModels="clr-namespace:GestionStationnement.ViewModels"
+        xmlns:converters="clr-namespace:GestionStationnement.Converters"
+        xmlns:helpers="clr-namespace:GestionStationnement.Helpers"
+        Title="Gestionnaire de Stationnement - Fenêtre de Configuration"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="#FF2A2A2A" Width="1481.6" ResizeMode="CanMinimize" Height="818.4" WindowStyle="None" Icon="/GestionStationnement;component/Resources/plan.ico">
+    <Window.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
+        <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter" />
+    </Window.Resources>
+    <Grid DataContext="{StaticResource Windows1ViewModel}">
+        <TabControl Margin="0,27,0.6,-0.6" BorderThickness="0">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Height="18" Source="plan.ico" />
+                        <TextBlock Text="Gestion du plan" Margin="0,0,5,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid Background="#FF2A2A2A">
+                    <Button Content="Choix du plan" Margin="0,32,26.4,0" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding LoadPlanSourceCommand, Mode=OneWay}" HorizontalAlignment="Right" Width="380" Height="30" VerticalAlignment="Top"/>
+                    <ListView Margin="0,449,28.4,27.4" Style="{DynamicResource PianoGlassListViewBase}" HorizontalAlignment="Right" Width="378" ItemsSource="{Binding SensorList}">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False" >
+                                <GridViewColumn Width="95" Header="Logical ID" DisplayMemberBinding="{Binding LogicalId}"/>
+                                <GridViewColumn Width="96" Header="X Position" DisplayMemberBinding="{Binding CoordinateX}"/>
+                                <GridViewColumn Width="95" Header="Y Position" DisplayMemberBinding="{Binding CoordinateY}"/>
+                                <GridViewColumn Width="96" Header="Statut" DisplayMemberBinding="{Binding IsOccupied}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Ajout d'un contrôleur" Margin="0,95,27.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding AddSensorTestCommand, Mode=OneWay}"/>
+                    <Button Content="Sauvegarder la configuration" Margin="0,158,27.6,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding SaveConfigCommand, Mode=OneWay}"/>
+                    <Button Content="Ouvrir configuration" Margin="0,222,29.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding LoadConfigCommand, Mode=OneWay}"/>
+                    <Border x:Name="ImageBorder" BorderBrush="#FF555555" BorderThickness="1" Margin="44
+                            ,30,430.4,29.4" Height="707">
+                        <Image Stretch="Fill" Source="{Binding PlanImageSource}" Margin="0.2,9.2,-0.4,-9.6"/>
+                    </Border>
+                    <ItemsControl Margin="38,32,430.4,29.4" ItemsSource="{Binding SensorList,Mode=TwoWay}" Panel.ZIndex="0" DataContext="{Binding Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Thumb Width="75" Height="75" DragDelta="Thumb_DragDelta" DataContext="{Binding Mode=OneWay}">
+                                    <Thumb.Template>
+                                        <ControlTemplate>
+                                            <Border Style="{StaticResource ResourceKey=BorderVisibleOnMouse}" Width ="75" Height="75">
+                                                <Image Width="75" Height="75" Source="car.png" Stretch="Fill"  Opacity="{Binding IsOccupied, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="Canvas.Left" Value="{Binding CoordinateX}" />
+                                <Setter Property="Canvas.Top" Value="{Binding CoordinateY}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ItemsControl>
+                </Grid>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Height="18" Source="alerte.ico" />
+                        <TextBlock Text="Gestion des alertes" Margin="0,0,5,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid Background="#FF2A2A2A"/>
+            </TabItem>
+        </TabControl>
+        <Button x:Name="CloseButton" Content="r" Margin="0,0,-0.4,0" VerticalAlignment="Top" Height="28" Style="{DynamicResource PianoTitleButtons}" FontFamily="Webdings" Click="Button_Click" HorizontalAlignment="Right" Width="39"/>
+        <Button x:Name="MinimizeButton" Content="0" Margin="0,0,38.6,0" VerticalAlignment="Top" Height="28" Style="{DynamicResource PianoTitleButtons}" FontFamily="Webdings" Click="MinimizeButton_Click" HorizontalAlignment="Right" Width="39"/>
+        <Label Content="Gestionnaire de stationnement - Outil de configuration" HorizontalAlignment="Left" Margin="551,10,0,0" VerticalAlignment="Top" Style="{DynamicResource LabelNormalBase}" FontSize="16"/>
+    </Grid>
+</Window>
