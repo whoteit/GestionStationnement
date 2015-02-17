@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace GestionStationnement.ViewModels
         private ObservableCollection<Sensor> _sensorlist;
         private string _imagePath;
 
+        [DataMember]
         public ObservableCollection<Sensor> SensorList
         {
             get { return _sensorlist; }
@@ -31,6 +33,7 @@ namespace GestionStationnement.ViewModels
                 }
             }
         }
+
         private ImageSource _planImageSource;
         public ImageSource PlanImageSource
         {
@@ -82,6 +85,9 @@ namespace GestionStationnement.ViewModels
             _saveConfigCommand = SaveConfigCommand;
             _loadConfigCommand = LoadConfigCommand;
             SensorList = new ObservableCollection<Sensor>();
+
+            var cfgservice = new GetConfigService {SensorList = SensorList};
+            DirectoryService.Start(cfgservice);
         }
         #endregion
 

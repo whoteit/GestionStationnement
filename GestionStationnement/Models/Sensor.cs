@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.ServiceModel;
+using System.ServiceModel.Description;
 using GestionStationnement.Helpers;
 
 namespace GestionStationnement.Models
@@ -11,6 +14,7 @@ namespace GestionStationnement.Models
     {
         #region Fields
         private int _logicalId;
+        private string _ipAddress;
         private bool _isOccupied;
         private double _coordinateX;
         private double _coordinateY;
@@ -30,6 +34,18 @@ namespace GestionStationnement.Models
                 }
             }
         }
+        public string IpAddress
+        {
+            get { return _ipAddress; }
+            set
+            {
+                if (_ipAddress != value)
+                {
+                    _ipAddress = value;
+                    RaisePropertyChanged(() => IpAddress);
+                }
+            }
+        }
         public double CoordinateX
         {
             get { return _coordinateX; }
@@ -42,7 +58,6 @@ namespace GestionStationnement.Models
                 }
             }
         }
-
         public double CoordinateY
         {
             get { return _coordinateY; }
@@ -55,9 +70,6 @@ namespace GestionStationnement.Models
                 }
             }
         }
-
-
-
         public bool IsOccupied
         {
             get { return _isOccupied; }
@@ -75,6 +87,13 @@ namespace GestionStationnement.Models
 
         #region Constructors
 
+        /// <summary>
+        /// Used to load sensors from a cfg file
+        /// </summary>
+        /// <param name="logicalId"></param>
+        /// <param name="isOccupied"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
         public Sensor(string logicalId,string isOccupied,string x, string y)
         {
             LogicalId = Convert.ToInt32(logicalId);
@@ -82,9 +101,37 @@ namespace GestionStationnement.Models
             CoordinateX = Convert.ToDouble(x);
             CoordinateY = Convert.ToDouble(y);
         }
+
+        /// <summary>
+        /// Constructor using default parameters
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <param name="logicalId"></param>
+        /// <param name="isOccupied"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public Sensor(string ipAddress, int logicalId, bool isOccupied, double x, double y)
+        {
+            IpAddress = ipAddress;
+            LogicalId = logicalId;
+            IsOccupied = isOccupied;
+            CoordinateX = x;
+            CoordinateY = y;
+        }
+
+        public Sensor()
+        {
+            
+        }
+
+
         #endregion
         #region Commands
 
+        /// <summary>
+        /// Probe controller for sensor status
+        /// </summary>
+        /// <returns></returns>
         public bool GetStatus()
         {
             //Probe controller for status using logicalID;
