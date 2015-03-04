@@ -3,10 +3,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using GestionStationnement.Helpers;
 using GestionStationnement.Models;
@@ -16,6 +14,28 @@ namespace GestionStationnement.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         #region Properties
+
+        private string _pendingIpAddress = "192.168.1.100";
+        private string _pendingLogicalId = "1";
+        private string _pendingFriendlyName = "A1";
+
+        public string PendingIpAddress
+        {
+            get { return _pendingIpAddress; }
+            set { _pendingIpAddress = value; RaisePropertyChanged(()=> PendingIpAddress); }
+        }
+
+        public string PendingLogicalId
+        {
+            get { return _pendingLogicalId; }
+            set { _pendingLogicalId = value; RaisePropertyChanged(() => PendingLogicalId); }
+        }
+
+        public string PendingFriendlyName
+        {
+            get { return _pendingFriendlyName; }
+            set { _pendingFriendlyName = value; RaisePropertyChanged(() => PendingFriendlyName); }
+        }
 
         private ObservableCollection<Sensor> _sensorlist;
         private string _imagePath;
@@ -124,8 +144,7 @@ namespace GestionStationnement.ViewModels
 
         private void OnAddSensor()
         {
-            var test = new Sensor("1","true","0","0");
-            SensorList.Add(test);
+            SensorList.Add(new Sensor(PendingIpAddress, PendingLogicalId, "true", PendingFriendlyName, "20", "20"));
         }
 
         private void OnSaveConfig()
@@ -135,7 +154,7 @@ namespace GestionStationnement.ViewModels
                 file.WriteLine(_imagePath);
                 foreach (var sensor in SensorList)
                 {
-                    file.WriteLine("{0},{1},{2},{3}",sensor.LogicalId,sensor.IsOccupied,sensor.CoordinateX,sensor.CoordinateY);
+                    file.WriteLine("{0},{1},{2},{3},{4},{5}", sensor.IpAddress, sensor.LogicalId, sensor.IsOccupied, sensor.FriendlyName, sensor.CoordinateX, sensor.CoordinateY);
                 }
             }
         }
@@ -158,29 +177,25 @@ namespace GestionStationnement.ViewModels
                 var filePath = dlg.FileName;
 
 
-                if (File.Exists(filePath))
+                if (!File.Exists(filePath)) return;
+                using (var sr = new StreamReader(filePath))
                 {
-                    using (var sr = new StreamReader(filePath))
+                    SensorList.Clear();
+                    var temp = sr.ReadLine();
+                    PlanImageSource = new BitmapImage(new Uri(temp));
+                    _imagePath = temp;
+                    RaisePropertyChanged(() => PlanImageSource);
+
+                    while (sr.Peek() >= 0)
                     {
-                        SensorList.Clear();
-                        var temp = sr.ReadLine();
-                        PlanImageSource = new BitmapImage(new Uri(temp));
-                        _imagePath = temp;
-                        RaisePropertyChanged(() => PlanImageSource);
-
-                        while (sr.Peek() >= 0)
+                        var readLine = sr.ReadLine();
+                        if (!string.IsNullOrEmpty(readLine))
                         {
-                            var readLine = sr.ReadLine();
-                            if (readLine.Length != 0)
-                            {
-                                SensorList.Add(new Sensor(readLine.Split(',')[0],readLine.Split(',')[1], readLine.Split(',')[2], readLine.Split(',')[3]));
-                            }
-
+                            SensorList.Add(new Sensor(readLine.Split(',')[0], readLine.Split(',')[1], readLine.Split(',')[2], readLine.Split(',')[3], readLine.Split(',')[4], readLine.Split(',')[5]));
                         }
+
                     }
-
                 }
-
             }
             catch (Exception ex)
             {

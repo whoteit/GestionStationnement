@@ -12,11 +12,13 @@ namespace GestionStationnement.Models
     static class DirectoryService
     {
         private static readonly Uri RetrieveInitialConfigUri = new Uri("http://localhost:8080/RetrieveConfig");
-        private static ServiceHost _host;
+        private static readonly Uri UpdateUri = new Uri("net.tcp://localhost");
+        private static ServiceHost _configHost;
+        private static ServiceHost _updateHost;
 
         public static void Start(GetConfigService configService)
         {
-            _host = new ServiceHost(configService, RetrieveInitialConfigUri);
+            _configHost = new ServiceHost(configService, RetrieveInitialConfigUri);
             {
                 // Enable metadata publishing.
                 var smb = new ServiceMetadataBehavior
@@ -25,20 +27,20 @@ namespace GestionStationnement.Models
                     MetadataExporter = {PolicyVersion = PolicyVersion.Policy15},
                     
                 };
-                _host.Description.Behaviors.Add(smb);
+                _configHost.Description.Behaviors.Add(smb);
+                _configHost.Open();
+             }
 
-                // Open the ServiceHost to start listening for messages. Since
-                // no endpoints are explicitly configured, the runtime will create
-                // one endpoint per base address for each service contract implemented
-                // by the service.
-                _host.Open();
+            var updatebinding = new NetTcpBinding();
+            _updateHost = new ServiceHost(typeof(MyService), UpdateUri);
+            _updateHost.AddServiceEndpoint(typeof(IMyContract), updatebinding, "");
+            _updateHost.Open();
 
-            }
         }
 
         public static void Stop()
         {
-            _host.Close();
+            _configHost.Close();
         }
 
     }
@@ -58,6 +60,31 @@ namespace GestionStationnement.Models
         public ObservableCollection<Sensor> GetSensorConfig()
         {
             return SensorList;
+        }
+    }
+
+    public interface IMyContractCallback
+    {
+        [OperationContract]
+        void OnCallback();
+    }
+
+    [ServiceContract(CallbackContract = typeof(IMyContractCallback))]
+    public interface IMyContract
+    {
+        [OperationContract]
+        Sensor UpdateSensor(Guid guid);
+    }
+
+    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Reentrant)]
+    public class MyService : IMyContract
+    {
+        public ObservableCollection<Sensor> SensorList { get; set; }
+        public Sensor UpdateSensor(Guid guid)
+        {
+            var callback = OperationContext.Current.GetCallbackChannel<IMyContractCallback>();
+            callback.OnCallback();
+            return SensorList.First(sensor => sensor.Guid == guid);
         }
     }
 
