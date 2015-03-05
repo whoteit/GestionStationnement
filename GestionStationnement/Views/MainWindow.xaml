@@ -6,13 +6,11 @@
         mc:Ignorable="d"
 		xmlns:viewModels="clr-namespace:GestionStationnement.ViewModels"
         xmlns:converters="clr-namespace:GestionStationnement.Converters"
-        xmlns:helpers="clr-namespace:GestionStationnement.Helpers"
         Title="Gestionnaire de Stationnement - Fenêtre de Configuration"
         WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="#FF2A2A2A" Width="1481.6" ResizeMode="CanMinimize" Height="818.4" WindowStyle="None" Icon="/GestionStationnement;component/Resources/plan.ico">
     <Window.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
-        <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter" />
     </Window.Resources>
     <Grid DataContext="{StaticResource Windows1ViewModel}">
         <TabControl Margin="0,27,0.6,-0.6" BorderThickness="0">

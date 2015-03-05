@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 
-namespace GestionStationnement.Helpers
+namespace NotifyService
 {
     [DataContract]
     public class NotificationObject : INotifyPropertyChanged

@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using GestionStationnement.Helpers;
 using GestionStationnement.Models;
 
+
 namespace GestionStationnement.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
@@ -18,6 +19,9 @@ namespace GestionStationnement.ViewModels
         private string _pendingIpAddress = "192.168.1.100";
         private string _pendingLogicalId = "1";
         private string _pendingFriendlyName = "A1";
+
+        private GetConfigService cfgservice;
+        private SensorUpdateService updtservice;
 
         public string PendingIpAddress
         {
@@ -106,7 +110,7 @@ namespace GestionStationnement.ViewModels
             _loadConfigCommand = LoadConfigCommand;
             SensorList = new ObservableCollection<Sensor>();
 
-            var cfgservice = new GetConfigService {SensorList = SensorList};
+            cfgservice = new GetConfigService {SensorList = SensorList};
             DirectoryService.Start(cfgservice);
         }
         #endregion
@@ -206,6 +210,5 @@ namespace GestionStationnement.ViewModels
 
         #endregion
 
-        
     }
 }

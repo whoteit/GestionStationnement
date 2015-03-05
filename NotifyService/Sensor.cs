@@ -2,13 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
-using GestionStationnement.Helpers;
 
-namespace GestionStationnement.Models
+namespace NotifyService
 {
     [DataContract]
     public class Sensor : NotificationObject
