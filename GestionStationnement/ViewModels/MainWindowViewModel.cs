@@ -21,7 +21,7 @@ namespace GestionStationnement.ViewModels
         private string _pendingFriendlyName = "A1";
 
         private GetConfigService cfgservice;
-        private SensorUpdateService updtservice;
+       // private SensorUpdateService updtservice;
 
         public string PendingIpAddress
         {
@@ -112,6 +112,7 @@ namespace GestionStationnement.ViewModels
 
             cfgservice = new GetConfigService {SensorList = SensorList};
             DirectoryService.Start(cfgservice);
+            SensorList.CollectionChanged += SensorList_CollectionChanged;
         }
         #endregion
 
@@ -205,6 +206,29 @@ namespace GestionStationnement.ViewModels
             {
                 MessageBox.Show(ex.Message);
             }
+            
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+
+        private void SensorList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.NewItems != null)
+                foreach (Sensor item in e.NewItems)
+                    item.PropertyChanged += Unit_PropertyChanged;
+
+            if (e.OldItems != null)
+                foreach (Sensor item in e.OldItems)
+                    item.PropertyChanged -= Unit_PropertyChanged;
+        }
+
+        private void Unit_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            var unit = (Sensor)sender;
             
         }
 

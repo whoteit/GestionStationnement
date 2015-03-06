@@ -10,7 +10,6 @@ namespace GestionStationnement.Models
     static class DirectoryService
     {
         private static readonly Uri RetrieveInitialConfigUri = new Uri("http://localhost:8086/Retrievecfg");
-        private static readonly Uri UpdateUri = new Uri("http://localhost:8081/");
         private static ServiceHost _configHost;
         private static ServiceHost _updateHost;
 
@@ -26,10 +25,9 @@ namespace GestionStationnement.Models
                 };
 
                 _configHost.Description.Behaviors.Add(smb);
-                //_configHost.Open();
+                _configHost.Open();
              }
             _updateHost = new ServiceHost(typeof(SensorUpdateService));
-            // Start the server
             _updateHost.Open();
         }
 
@@ -61,33 +59,59 @@ namespace GestionStationnement.Models
     interface IUpdateCallback
     {
         [OperationContract(IsOneWay = true)]
-        void OnSensorUpdate(Sensor sensor);
+        void SensorUpdate(Sensor sensor);
     }
 
-    [ServiceContract(CallbackContract = typeof(IUpdateCallback))]
+    [ServiceContract(CallbackContract = typeof(IUpdateCallback), SessionMode = SessionMode.Required)]
     public interface ISensorUpdateService
     {
-        [OperationContract]
-        void SensorUpdate(Sensor sensor);
+        [OperationContract(IsOneWay = false, IsInitiating = true)]
+        void Subscribe();
+        [OperationContract(IsOneWay = false, IsInitiating = true)]
+        void Unsubscribe();
+        [OperationContract(IsOneWay = false)]
+        void PublishSensorUpdate(Sensor sensor);
 
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class SensorUpdateService : ISensorUpdateService
     {
-        private static readonly Dictionary<string, OperationContext> Subscribers = new Dictionary<string, OperationContext>();
-        public void SensorUpdate(Sensor sensor)
+        public delegate void SensorUpdateEventHandler(object sender, ServiceEventArgs e);
+        public static event SensorUpdateEventHandler SensorUpdateEvent;
+        private IUpdateCallback _serviceCallback;
+        private SensorUpdateEventHandler _updateHandler;
+
+
+        public void Subscribe()
         {
-            if (Subscribers.Count <= 0) return;
-            foreach (var proxy in Subscribers.Select(item => item.Value.GetCallbackChannel<IUpdateCallback>()))
-            {
-                proxy.OnSensorUpdate(sensor);
-            }
+            _serviceCallback = OperationContext.Current.GetCallbackChannel<IUpdateCallback>();
+            _updateHandler = SensorUpdateHandler;
+            SensorUpdateEvent += _updateHandler;
         }
+
+        public void Unsubscribe()
+        {
+            SensorUpdateEvent -= _updateHandler;
+        }
+
+        public void PublishSensorUpdate(Sensor sensor)
+        {
+            var se = new ServiceEventArgs { Sensor = sensor };
+            SensorUpdateEvent(this, se);
+        }
+
+        private void SensorUpdateHandler(object sender, ServiceEventArgs se)
+        {
+            _serviceCallback.SensorUpdate(se.Sensor);
+        }
+
+    }
+
+    public class ServiceEventArgs : EventArgs
+    {
+        public Sensor Sensor;
     }
 
     
-
-   
-
 }
