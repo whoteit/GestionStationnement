@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -19,6 +21,7 @@ namespace GestionStationnement.ViewModels
         private string _pendingIpAddress = "192.168.1.100";
         private string _pendingLogicalId = "1";
         private string _pendingFriendlyName = "A1";
+        private Publisher _publisher;
 
         private GetConfigService cfgservice;
        // private SensorUpdateService updtservice;
@@ -109,10 +112,12 @@ namespace GestionStationnement.ViewModels
             _saveConfigCommand = SaveConfigCommand;
             _loadConfigCommand = LoadConfigCommand;
             SensorList = new ObservableCollection<Sensor>();
-
             cfgservice = new GetConfigService {SensorList = SensorList};
             DirectoryService.Start(cfgservice);
+            _publisher = new Publisher();
+            _publisher.Connect();
             SensorList.CollectionChanged += SensorList_CollectionChanged;
+
         }
         #endregion
 
@@ -149,7 +154,9 @@ namespace GestionStationnement.ViewModels
 
         private void OnAddSensor()
         {
-            SensorList.Add(new Sensor(PendingIpAddress, PendingLogicalId, "true", PendingFriendlyName, "20", "20"));
+            var sensor = new Sensor(PendingIpAddress, PendingLogicalId, "true", PendingFriendlyName, "20", "20");
+            SensorList.Add(sensor);
+
         }
 
         private void OnSaveConfig()
@@ -201,6 +208,7 @@ namespace GestionStationnement.ViewModels
 
                     }
                 }
+
             }
             catch (Exception ex)
             {
@@ -228,7 +236,9 @@ namespace GestionStationnement.ViewModels
 
         private void Unit_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var unit = (Sensor)sender;
+            var sensor = (Sensor)sender;
+            
+           _publisher.Publish(sensor.Guid, e.PropertyName, typeof(Sensor).GetProperty(e.PropertyName).GetValue(sensor).ToString());
             
         }
 

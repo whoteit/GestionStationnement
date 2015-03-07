@@ -87,8 +87,10 @@
     <Compile Include="Converters\IsBiggerThanConverter.cs" />
     <Compile Include="Helpers\DelegateCommand.cs" />
     <Compile Include="Helpers\NotificationObject.cs" />
+    <Compile Include="Helpers\PubSerClient.cs" />
     <Compile Include="Helpers\Thumb.cs" />
     <Compile Include="Models\DirectoryService.cs" />
+    <Compile Include="Models\PubClient.cs" />
     <Compile Include="Models\Sensor.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
@@ -116,7 +118,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -106,7 +106,7 @@ namespace GestionStationnement.Models
             {
                 if (_isOccupied == value) return;
                 _isOccupied = value;
-                _stopwatch.Restart();
+                //_stopwatch.Restart();
                 RaisePropertyChanged(() => IsOccupied);
             }
         }
@@ -125,6 +125,7 @@ namespace GestionStationnement.Models
         /// <summary>
         /// Used to load sensors from a cfg file
         /// </summary>
+        /// <param name="ipAddress"></param>
         /// <param name="logicalId"></param>
         /// <param name="isOccupied"></param>
         /// <param name="x"></param>

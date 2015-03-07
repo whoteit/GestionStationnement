@@ -9,7 +9,7 @@ namespace GestionStationnement.Models
 {
     static class DirectoryService
     {
-        private static readonly Uri RetrieveInitialConfigUri = new Uri("http://localhost:8086/Retrievecfg");
+        private static readonly Uri RetrieveInitialConfigUri = new Uri("http://localhost:8087/Retrievecfg");
         private static ServiceHost _configHost;
         private static ServiceHost _updateHost;
 
@@ -25,7 +25,7 @@ namespace GestionStationnement.Models
                 };
 
                 _configHost.Description.Behaviors.Add(smb);
-                _configHost.Open();
+               _configHost.Open();
              }
             _updateHost = new ServiceHost(typeof(SensorUpdateService));
             _updateHost.Open();
@@ -34,6 +34,7 @@ namespace GestionStationnement.Models
         public static void Stop()
         {
             _configHost.Close();
+            _updateHost.Close();
         }
 
     }
@@ -59,7 +60,7 @@ namespace GestionStationnement.Models
     interface IUpdateCallback
     {
         [OperationContract(IsOneWay = true)]
-        void SensorUpdate(Sensor sensor);
+        void SensorUpdate(Guid guid, string propertyname, string propertyvalue);
     }
 
     [ServiceContract(CallbackContract = typeof(IUpdateCallback), SessionMode = SessionMode.Required)]
@@ -70,7 +71,7 @@ namespace GestionStationnement.Models
         [OperationContract(IsOneWay = false, IsInitiating = true)]
         void Unsubscribe();
         [OperationContract(IsOneWay = false)]
-        void PublishSensorUpdate(Sensor sensor);
+        void PublishSensorUpdate(Guid guid, string propertyname, string propertyvalue);
 
     }
 
@@ -95,22 +96,24 @@ namespace GestionStationnement.Models
             SensorUpdateEvent -= _updateHandler;
         }
 
-        public void PublishSensorUpdate(Sensor sensor)
+        public void PublishSensorUpdate(Guid guid, string propertyname, string propertyvalue)
         {
-            var se = new ServiceEventArgs { Sensor = sensor };
+            var se = new ServiceEventArgs { Guid = guid, PropertyName = propertyname, PropertyValue = propertyvalue};
             SensorUpdateEvent(this, se);
         }
 
         private void SensorUpdateHandler(object sender, ServiceEventArgs se)
         {
-            _serviceCallback.SensorUpdate(se.Sensor);
+            _serviceCallback.SensorUpdate(se.Guid, se.PropertyName, se.PropertyValue);
         }
 
     }
 
     public class ServiceEventArgs : EventArgs
     {
-        public Sensor Sensor;
+        public Guid Guid;
+        public string PropertyName;
+        public string PropertyValue;
     }
 
     
