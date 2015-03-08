@@ -21,9 +21,9 @@ namespace GestionStationnement.Models
                 {
                     HttpGetEnabled = true,
                     MetadataExporter = {PolicyVersion = PolicyVersion.Policy15},
-                    
+                   
                 };
-
+               
                 _configHost.Description.Behaviors.Add(smb);
                _configHost.Open();
              }

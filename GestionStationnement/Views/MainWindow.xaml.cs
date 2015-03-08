@@ -15,7 +15,6 @@ namespace GestionStationnement.Views
         {
             InitializeComponent();
             MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight-14; 
-            Width = SystemParameters.MaximizedPrimaryScreenWidth;
         }
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {

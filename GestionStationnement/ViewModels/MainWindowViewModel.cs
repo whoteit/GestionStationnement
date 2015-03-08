@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -102,20 +103,26 @@ namespace GestionStationnement.ViewModels
         {
             get { return _loadConfigCommand ?? (_loadConfigCommand = new DelegateCommand(OnLoadConfig)); }
         }
+
+        private ICommand _startServiceCommand;
+        public ICommand StartServiceCommand
+        {
+            get { return _startServiceCommand ?? (_startServiceCommand = new DelegateCommand(OnStartService)); }
+        }
+
+        private ICommand _stopServiceCommand;
+        public ICommand StopServiceCommand
+        {
+            get { return _stopServiceCommand ?? (_stopServiceCommand = new DelegateCommand(OnStopService)); }
+        }
+
         #endregion
 
         #region Ctor
         public MainWindowViewModel()
         {
-            _loadPlanSourceCommand = LoadPlanSourceCommand;
-            _addSensorTestCommand = AddSensorTestCommand;
-            _saveConfigCommand = SaveConfigCommand;
-            _loadConfigCommand = LoadConfigCommand;
+
             SensorList = new ObservableCollection<Sensor>();
-            cfgservice = new GetConfigService {SensorList = SensorList};
-            DirectoryService.Start(cfgservice);
-            _publisher = new Publisher();
-            _publisher.Connect();
             SensorList.CollectionChanged += SensorList_CollectionChanged;
 
         }
@@ -217,6 +224,21 @@ namespace GestionStationnement.ViewModels
             
         }
 
+        private void OnStartService()
+        {
+            cfgservice = new GetConfigService { SensorList = SensorList };
+            DirectoryService.Start(cfgservice);
+            _publisher = new Publisher();
+            _publisher.Connect();
+            
+        }
+
+        private void OnStopService()
+        {
+            DirectoryService.Stop();
+            _publisher.Disconnect();
+        }
+
         #endregion
 
         #region Event Handlers
@@ -236,10 +258,18 @@ namespace GestionStationnement.ViewModels
 
         private void Unit_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var sensor = (Sensor)sender;
-            
-           _publisher.Publish(sensor.Guid, e.PropertyName, typeof(Sensor).GetProperty(e.PropertyName).GetValue(sensor).ToString());
-            
+            try
+            {
+                var sensor = (Sensor) sender;
+_publisher.Publish(sensor.Guid, e.PropertyName,
+                    typeof (Sensor).GetProperty(e.PropertyName).GetValue(sensor).ToString());
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         #endregion

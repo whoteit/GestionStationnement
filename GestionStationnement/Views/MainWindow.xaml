@@ -7,7 +7,7 @@
 		xmlns:viewModels="clr-namespace:GestionStationnement.ViewModels"
         xmlns:converters="clr-namespace:GestionStationnement.Converters"
         Title="Gestionnaire de Stationnement - Fenêtre de Configuration"
-        WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="#FF2A2A2A" Width="1481.6" ResizeMode="CanMinimize" Height="818.4" WindowStyle="None" Icon="/GestionStationnement;component/Resources/plan.ico">
+        WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="#FF2A2A2A" ResizeMode="CanMinimize" WindowStyle="None" Icon="/GestionStationnement;component/Resources/plan.ico" d:DesignWidth="1654" d:DesignHeight="935">
     <Window.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
@@ -22,7 +22,7 @@
                     </StackPanel>
                 </TabItem.Header>
                 <Grid Background="#FF2A2A2A">
-                    <Button Content="Choix du plan" Margin="0,32,26.4,0" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding LoadPlanSourceCommand, Mode=OneWay}" HorizontalAlignment="Right" Width="380" Height="30" VerticalAlignment="Top"/>
+                    <Button Content="Choisir un plan" Margin="0,32,26.4,0" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding LoadPlanSourceCommand, Mode=OneWay}" HorizontalAlignment="Right" Width="380" Height="30" VerticalAlignment="Top"/>
                     <ListView Margin="0,449,28,27" Style="{DynamicResource PianoGlassListViewBase}" HorizontalAlignment="Right" Width="378" ItemsSource="{Binding SensorList}">
                         <ListView.View>
                             <GridView AllowsColumnReorder="False" >
@@ -33,9 +33,9 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Button Content="Ajout d'un contrôleur" Margin="0,199,26.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding AddSensorTestCommand, Mode=OneWay}"/>
-                    <Button Content="Sauvegarder la configuration" Margin="0,142,26.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding SaveConfigCommand, Mode=OneWay}"/>
-                    <Button Content="Ouvrir configuration" Margin="0,89,26.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding LoadConfigCommand, Mode=OneWay}"/>
+                    <Button Content="Ajouter un contrôleur" Margin="0,199,26.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding AddSensorTestCommand, Mode=OneWay}"/>
+                    <Button Content="Sauvegarder la configuration courante" Margin="0,142,26.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding SaveConfigCommand, Mode=OneWay}"/>
+                    <Button Content="Ouvrir une configuration existante" Margin="0,89,26.4,0" VerticalAlignment="Top" Height="30" Style="{DynamicResource PianoGlassButtonBase}" HorizontalAlignment="Right" Width="380" Command="{Binding LoadConfigCommand, Mode=OneWay}"/>
                     <TextBox Margin="0,276,196.4,0" TextWrapping="Wrap" Text="{Binding PendingIpAddress}" Style="{DynamicResource TextBoxStyleBase}" Height="21" VerticalAlignment="Top" HorizontalAlignment="Right" Width="210"/>
                     <TextBox Margin="0,319,196.4,0" TextWrapping="Wrap" Text="{Binding PendingLogicalId}" Style="{DynamicResource TextBoxStyleBase}" Height="21" VerticalAlignment="Top" HorizontalAlignment="Right" Width="210"/>
                     <TextBox Margin="0,364,196.4,0" TextWrapping="Wrap" Text="{Binding PendingFriendlyName}" Style="{DynamicResource TextBoxStyleBase}" Height="21" VerticalAlignment="Top" HorizontalAlignment="Right" Width="210"/>
@@ -47,7 +47,7 @@
                     <ItemsControl Margin="38,32,430.4,29.4" ItemsSource="{Binding SensorList,Mode=TwoWay}" Panel.ZIndex="0" DataContext="{Binding Mode=OneWay}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas />
+                                <Canvas Margin="1,1,1,1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
@@ -85,7 +85,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <Image Height="18" Source="1425279978_muscle_car.png" />
-                        <TextBlock Text=" Configuration des capteurs" Margin="0,0,5,0" VerticalAlignment="Center" />
+                        <TextBlock Text=" Configuration avancée" Margin="0,0,5,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </TabItem.Header>
                 <Grid Background="#FF2A2A2A">
@@ -107,6 +107,8 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
+                    <Button Content="Démarrer le service" HorizontalAlignment="Left" Margin="985,30,0,0" VerticalAlignment="Top" Width="289" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StartServiceCommand, Mode=OneWay}"/>
+                    <Button Content="Arrêter le service" HorizontalAlignment="Left" Margin="1306,29,0,0" VerticalAlignment="Top" Width="288" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StopServiceCommand, Mode=OneWay}"/>
                 </Grid>
             </TabItem>
             <TabItem>

@@ -21,12 +21,13 @@ namespace GestionStationnement.Models
 
         public void Publish(Guid guid, string propertyname, string propertyvalue)
         {
+            
             _client.PublishSensorUpdateAsync(guid, propertyname, propertyvalue);
         }
 
         public void Disconnect()
         {
-            _client.Close();
+            _client.Abort();
         }
 
         public void SensorUpdate(Sensor sensor)
