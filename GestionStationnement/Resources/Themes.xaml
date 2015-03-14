@@ -1014,6 +1014,96 @@
         </Setter>
     </Style>
 
+
+    <Style x:Key="PassBoxStyleBase" BasedOn="{x:Null}" TargetType="{x:Type PasswordBox}">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="Black" />
+        <Setter Property="Padding" Value="1" />
+        <Setter Property="AllowDrop" Value="true" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type PasswordBox}">
+
+                    <!-- resources -->
+                    <ControlTemplate.Resources>
+
+                        <Storyboard x:Key="glowEnter">
+                            <DoubleAnimation Duration="00:00:00.30" To="1" Storyboard.TargetName="buttonGlow"
+                                             Storyboard.TargetProperty="(UIElement.Opacity)" />
+                        </Storyboard>
+
+                        <Storyboard x:Key="glowLeave">
+                            <DoubleAnimation Duration="00:00:00.30" From="1" Storyboard.TargetName="buttonGlow"
+                                             Storyboard.TargetProperty="(UIElement.Opacity)" />
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+
+                    <!-- body -->
+                    <Grid>
+
+                        <!-- glow effect -->
+                        <Border CornerRadius="3" Margin="1,1,1,1" Background="#FF333333" x:Name="buttonGlow" Opacity="0">
+                            <Border.Effect>
+                                <DropShadowEffect Direction="270" ShadowDepth="2" BlurRadius="12" Color=" #1E90FF"
+                                                  Opacity="1" RenderingBias="Quality" />
+                            </Border.Effect>
+                        </Border>
+
+                        <!-- outer border -->
+                        <Border CornerRadius="4" Background="#FF333333" Margin="-2,-2,-2,-2"
+                                BorderBrush="{StaticResource roundEmboss}" BorderThickness="0,0,0,0"
+                                x:Name="outerBorder">
+                            <!-- text box body -->
+                            <Border CornerRadius="2" Margin="0" Background="#FF555555" BorderBrush="#FF101010"
+                                    BorderThickness="1,1,1,1" x:Name="textboxBody">
+                                <!-- content -->
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Border>
+                        </Border>
+                    </Grid>
+
+                    <!-- triggers -->
+                    <ControlTemplate.Triggers>
+
+                        <!-- disabled -->
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+
+                        <!-- mouse over effect -->
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource glowEnter}" />
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource glowLeave}" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <!-- focus -->
+                        <Trigger Property="IsKeyboardFocused" Value="true">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource glowEnter}" />
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource glowLeave}" />
+                            </Trigger.ExitActions>
+                            <Setter TargetName="textboxBody" Property="Background" Value="#FF686565" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
+
+
+
+
     <Style x:Key="ComboStyle" BasedOn="{x:Null}" TargetType="{x:Type ComboBox}">
         <Setter Property="Foreground" Value="Gray" />
         <Setter Property="BorderBrush" Value="Black" />

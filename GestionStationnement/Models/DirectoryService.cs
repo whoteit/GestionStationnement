@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GestionStationnement.Models
 {
@@ -79,6 +81,7 @@ namespace GestionStationnement.Models
     public class SensorUpdateService : ISensorUpdateService
     {
         public delegate void SensorUpdateEventHandler(object sender, ServiceEventArgs e);
+        private readonly List<IUpdateCallback> _callbackList = new List<IUpdateCallback>();  
         public static event SensorUpdateEventHandler SensorUpdateEvent;
         private IUpdateCallback _serviceCallback;
         private SensorUpdateEventHandler _updateHandler;
@@ -87,6 +90,7 @@ namespace GestionStationnement.Models
         public void Subscribe()
         {
             _serviceCallback = OperationContext.Current.GetCallbackChannel<IUpdateCallback>();
+            _callbackList.Add(_serviceCallback);
             _updateHandler = SensorUpdateHandler;
             SensorUpdateEvent += _updateHandler;
         }
@@ -98,7 +102,8 @@ namespace GestionStationnement.Models
 
         public void PublishSensorUpdate(Guid guid, string propertyname, string propertyvalue)
         {
-            var se = new ServiceEventArgs { Guid = guid, PropertyName = propertyname, PropertyValue = propertyvalue};
+            if (_callbackList.Count <= 0) return;
+            var se = new ServiceEventArgs {Guid = guid, PropertyName = propertyname, PropertyValue = propertyvalue};
             SensorUpdateEvent(this, se);
         }
 

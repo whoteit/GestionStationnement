@@ -165,29 +165,45 @@ namespace GestionStationnement.Models
 
 
         #endregion
+
         #region Commands
 
         /// <summary>
         /// Probe controller for sensor status
         /// </summary>
         /// <returns></returns>
-        public void GetStatus()
+        public bool GetStatus()
         {
-            while (true)
+            try
             {
                 var uri = new Uri(string.Format("https://{0}/GetStatus{1}", IpAddress, LogicalId));
-                var webRequest = (HttpWebRequest) WebRequest.Create(uri);
-                var webResponse = (HttpWebResponse) webRequest.GetResponse();
+                var webRequest = (HttpWebRequest)WebRequest.Create(uri);
+                webRequest.Timeout = 3000;
+                var webResponse = (HttpWebResponse)webRequest.GetResponse();
 
                 using (var responseStream = webResponse.GetResponseStream())
                 {
-                    if (responseStream == null) return;
+                    if (responseStream == null) return false;
                     var reader = new StreamReader(responseStream, Encoding.UTF8);
                     var responseString = reader.ReadToEnd();
-                    IsOccupied = Convert.ToBoolean(responseString);
+                    if (!IsOccupied == Convert.ToBoolean(responseString))
+                    {
+                        if(!_stopwatch.IsRunning ==false)
+                            _stopwatch.Start();
+                        else
+                        {
+                            _stopwatch.Restart();
+                        }
+                    }
+                    TimeInState = _stopwatch.Elapsed;
+                    return Convert.ToBoolean(responseString);
                 }
-                Thread.Sleep(5000);
             }
+            catch (WebException)
+            {
+                return false;
+            }
+
 
         }
         #endregion
