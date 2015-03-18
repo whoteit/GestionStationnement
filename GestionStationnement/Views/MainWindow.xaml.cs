@@ -29,7 +29,8 @@ namespace GestionStationnement.Views
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            WindowState = System.Windows.WindowState.Minimized;
+            WindowState = WindowState.Minimized;
+
         }
         private void Thumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
         {

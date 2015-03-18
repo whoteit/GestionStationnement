@@ -7,7 +7,7 @@
 		xmlns:viewModels="clr-namespace:GestionStationnement.ViewModels"
         xmlns:converters="clr-namespace:GestionStationnement.Converters"
         Title="Gestionnaire de Stationnement - Fenêtre de Configuration"
-        WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="#FF2A2A2A" ResizeMode="CanMinimize" WindowStyle="None" Icon="/GestionStationnement;component/Resources/plan.ico" Height="977.5" Width="1921.5">
+        WindowStartupLocation="CenterScreen" WindowState="Maximized" Background="#FF2A2A2A" ResizeMode="CanMinimize" WindowStyle="None" Icon="/GestionStationnement;component/Resources/plan.ico" d:DesignWidth="1536" d:DesignHeight="821.2">
     <Window.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
@@ -89,38 +89,40 @@
                     </StackPanel>
                 </TabItem.Header>
                 <Grid Background="#FF2A2A2A">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="315*"/>
-                        <RowDefinition Height="452*"/>
-                    </Grid.RowDefinitions>
-                    <ListView Margin="31,25,0,36" Style="{DynamicResource PianoGlassListViewBase}" ItemsSource="{Binding SensorList}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="936">
+                    <ListView Margin="31,25,0,36" Style="{DynamicResource PianoGlassListViewBase}" ItemsSource="{Binding SensorList}" Grid.RowSpan="2" HorizontalAlignment="Left" Width="936" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListView.View>
                             <GridView AllowsColumnReorder="False" >
-                                <GridViewColumn Width="250" Header="Identificateur unique" DisplayMemberBinding="{Binding Guid}"/>
+                                <GridViewColumn Width="265" Header="Identificateur unique" DisplayMemberBinding="{Binding Guid}"/>
                                 <GridViewColumn Width="95" Header="Adresse IP" DisplayMemberBinding="{Binding IpAddress}"/>
                                 <GridViewColumn Width="96" Header="Logical ID" DisplayMemberBinding="{Binding LogicalId}"/>
                                 <GridViewColumn Width="95" Header="Nom de place" DisplayMemberBinding="{Binding FriendlyName}"/>
                                 <GridViewColumn Width="96" Header="Occupé" DisplayMemberBinding="{Binding IsOccupied}"/>
-                                <GridViewColumn Width="96" Header="Temps" DisplayMemberBinding="{Binding TimeInState.TotalSeconds}"/>
+                                <GridViewColumn Width="96" Header="Temps" DisplayMemberBinding="{Binding TimeInState}"/>
                                 <GridViewColumn Width="96" Header="Position X" DisplayMemberBinding="{Binding CoordinateX}"/>
                                 <GridViewColumn Width="96" Header="Position Y" DisplayMemberBinding="{Binding CoordinateY}"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
-
-                    <Button Content="Démarrer le service" Margin="1000,29,518,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StartServiceCommand, Mode=OneWay}"/>
-                    <Button Content="Arrêter le service" Margin="1000,76,518,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StopServiceCommand, Mode=OneWay}"/>
-                    <ListView Margin="1000,150,57,36" Grid.RowSpan="2" Style="{DynamicResource PianoGlassListViewBase}" ItemsSource="{Binding MessageHandler.Messages}">
+                    <Button Content="Démarrer le service" Margin="1000,29,0,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StartServiceCommand, Mode=OneWay}" HorizontalAlignment="Left" Width="221"/>
+                    <Button Content="Arrêter le service" Margin="1000,76,0,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StopServiceCommand, Mode=OneWay}" HorizontalAlignment="Left" Width="221"/>
+                    <ListView Margin="1000,150,57,36" Grid.RowSpan="2" Style="{DynamicResource PianoGlassListViewBase}" ItemsSource="{Binding MessageHandler.Messages}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Date" Width="80" DisplayMemberBinding="{Binding Date}"/>
-                                <GridViewColumn Header="Message" Width="740" DisplayMemberBinding="{Binding Message}"/>
+
+                                <GridViewColumn Header="Message" Width="400">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate x:Name="colTemplate">
+                                            <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding Path=Message}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Button Content="Commencer le sondage des capteurs" Margin="1466,29,57,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StartSensorPollCommand, Mode=OneWay}"/>
-                    <Button Content="Arrêter le sondage des capteurs" Margin="1466,76,57,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StopSensorPollCommand, Mode=OneWay}"/>
-                    <Image HorizontalAlignment="Left" Height="486" Margin="1216,296,0,0" VerticalAlignment="Top" Width="564" Source="/GestionStationnement;component/Resources/server.png" Opacity="0.1" Grid.RowSpan="2"/>
+                    <Button Content="Commencer le sondage des capteurs" Margin="1258,29,0,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StartSensorPollCommand, Mode=OneWay}" HorizontalAlignment="Left" Width="218"/>
+                    <Button Content="Arrêter le sondage des capteurs" Margin="1258,76,0,0" VerticalAlignment="Top" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding StopSensorPollCommand, Mode=OneWay}" HorizontalAlignment="Left" Width="218"/>
+                    <Image Height="338" Margin="1110,298,140.8,0" VerticalAlignment="Top" Source="/GestionStationnement;component/Resources/server.png" Opacity="0.1"/>
                 </Grid>
             </TabItem>
             <TabItem>
@@ -131,34 +133,34 @@
                     </StackPanel>
                 </TabItem.Header>
                 <Grid Background="#FF2A2A2A">
-                    <ListView Margin="45,46,1343,44" Style="{DynamicResource PianoGlassListViewBase}" ItemsSource="{Binding RecipientList}">
+                    <ListView Margin="45,46,963.8,44" Style="{DynamicResource PianoGlassListViewBase}" ItemsSource="{Binding RecipientList}">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="Destinataires (courriels)" Width="500"/>
+                                <GridViewColumn Header="Destinataires (courriels)" Width="520"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <CheckBox Content="Envoyer un courriel lorsqu'une erreur survient" HorizontalAlignment="Left" Margin="624,73,0,0" VerticalAlignment="Top" Width="283" Style="{DynamicResource CheckBoxStyleBase}" Height="22" IsChecked="{Binding EmailOnError}"/>
-                    <CheckBox Content="Envoyer un courriel  lorsque le temps limite de stationnement est dépassé" HorizontalAlignment="Left" Margin="623,113,0,0" VerticalAlignment="Top" Width="420" Style="{DynamicResource CheckBoxStyleBase}" Height="22" IsChecked="{Binding EmailOnTime}"/>
+                    <CheckBox Content="Envoyer un courriel lorsqu'une erreur survient" HorizontalAlignment="Left" Margin="624,73,0,0" VerticalAlignment="Top" Width="319" Style="{DynamicResource CheckBoxStyleBase}" Height="22" IsChecked="{Binding EmailOnError}" FontSize="14"/>
+                    <CheckBox Content="Envoyer un courriel  lorsque le temps limite de stationnement est dépassé" HorizontalAlignment="Left" Margin="623,113,0,0" VerticalAlignment="Top" Width="485" Style="{DynamicResource CheckBoxStyleBase}" Height="22" IsChecked="{Binding EmailOnTime}" FontSize="14"/>
                     <TextBox HorizontalAlignment="Left" Height="23" Margin="623,160,0,0" TextWrapping="Wrap" Text="{Binding TempsLimite}" VerticalAlignment="Top" Width="183" Style="{DynamicResource TextBoxStyleBase}"/>
-                    <Label Content="Temps limite (minutes)" HorizontalAlignment="Left" Margin="838,162,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
+                    <Label Content="Temps limite autorisé (minutes)" HorizontalAlignment="Left" Margin="838,162,0,0" VerticalAlignment="Top" Width="206" Style="{DynamicResource LabelNormalBase}"/>
                     <Rectangle HorizontalAlignment="Left" Height="164" Stroke="#FF616161" VerticalAlignment="Top" Width="589" Margin="606,46,0,0" Panel.ZIndex="-1"/>
-                    <Rectangle HorizontalAlignment="Left" Height="274" Margin="606,257,0,0" Stroke="#FF616161" VerticalAlignment="Top" Width="589"/>
-                    <TextBox HorizontalAlignment="Left" Height="22" Margin="626,292,0,0" TextWrapping="Wrap" Text="{Binding AddresseServeur}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
-                    <TextBox HorizontalAlignment="Left" Height="22" Margin="625,347,0,0" TextWrapping="Wrap" Text="{Binding PortServer}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
-                    <Label Content="Adresse serveur SMTP" HorizontalAlignment="Left" Margin="946,292,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
-                    <Label Content="Port serveur SMTP" HorizontalAlignment="Left" Margin="945,350,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
-                    <TextBox HorizontalAlignment="Left" Height="22" Margin="625,406,0,0" TextWrapping="Wrap" Text="{Binding AdresseSource}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
-                    <Label Content="Adresse courriel source" HorizontalAlignment="Left" Margin="945,407,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
-                    <Label Content="Mot de passe" HorizontalAlignment="Left" Margin="945,468,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
-                    <Rectangle HorizontalAlignment="Left" Margin="605,582,0,44" Stroke="#FF616161" Width="589"/>
-                    <Label Content="Adresse à ajouter ou supprimer" HorizontalAlignment="Left" Margin="946,624,0,0" VerticalAlignment="Top" Width="211" Style="{DynamicResource LabelNormalBase}"/>
+                    <Rectangle HorizontalAlignment="Left" Height="244" Margin="606,257,0,0" Stroke="#FF616161" VerticalAlignment="Top" Width="589"/>
+                    <TextBox HorizontalAlignment="Left" Height="22" Margin="626,290,0,0" TextWrapping="Wrap" Text="{Binding AddresseServeur}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
+                    <TextBox HorizontalAlignment="Left" Height="22" Margin="625,335,0,0" TextWrapping="Wrap" Text="{Binding PortServer}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
+                    <Label Content="Adresse serveur SMTP" HorizontalAlignment="Left" Margin="946,290,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
+                    <Label Content="Port serveur SMTP" HorizontalAlignment="Left" Margin="945,336,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
+                    <TextBox HorizontalAlignment="Left" Height="22" Margin="625,382,0,0" TextWrapping="Wrap" Text="{Binding AdresseSource}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
+                    <Label Content="Adresse courriel source" HorizontalAlignment="Left" Margin="945,385,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
+                    <Label Content="Mot de passe" HorizontalAlignment="Left" Margin="945,434,0,0" VerticalAlignment="Top" Width="189" Style="{DynamicResource LabelNormalBase}"/>
+                    <Rectangle HorizontalAlignment="Left" Margin="605,540,0,44" Stroke="#FF616161" Width="589"/>
+                    <Label Content="Adresse à ajouter ou supprimer" HorizontalAlignment="Left" Margin="945,575,0,0" VerticalAlignment="Top" Width="211" Style="{DynamicResource LabelNormalBase}"/>
 
-                    <Image HorizontalAlignment="Left" Height="528" Margin="1354,203,0,0" VerticalAlignment="Top" Width="430" Source="/GestionStationnement;component/Resources/red-police-beacon-light.png" Opacity="0.2"/>
-                    <Button Content="Ajouter" HorizontalAlignment="Left" Margin="626,700,0,0" VerticalAlignment="Top" Width="287" Height="35" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding AddRecipientCommand, Mode=OneWay}"/>
-                    <Button Content="Supprimer" HorizontalAlignment="Left" Margin="626,768,0,0" VerticalAlignment="Top" Width="287" Height="34" Style="{DynamicResource PianoGlassButtonBase}"/>
-                    <TextBox HorizontalAlignment="Left" Height="22" Margin="626,626,0,0" TextWrapping="Wrap" Text="{Binding PendingAddr}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
-                    <TextBox HorizontalAlignment="Left" Height="22" Margin="625,468,0,0" TextWrapping="Wrap" Text="{Binding MotDePasse}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}" Foreground="{x:Null}"/>
+                    <Image HorizontalAlignment="Left" Height="304" Margin="1270,257,0,0" VerticalAlignment="Top" Width="209" Source="/GestionStationnement;component/Resources/Gyrophare.png" Opacity="0.15"/>
+                    <Button Content="Ajouter" HorizontalAlignment="Left" Margin="626,619,0,0" VerticalAlignment="Top" Width="287" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding AddRecipientCommand, Mode=OneWay}"/>
+                    <Button Content="Supprimer" HorizontalAlignment="Left" Margin="626,670,0,0" VerticalAlignment="Top" Width="287" Height="34" Style="{DynamicResource PianoGlassButtonBase}" Command="{Binding RemoveRecipientCommand, Mode=OneWay}"/>
+                    <TextBox HorizontalAlignment="Left" Height="22" Margin="626,573,0,0" TextWrapping="Wrap" Text="{Binding PendingAddr}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}"/>
+                    <TextBox HorizontalAlignment="Left" Height="22" Margin="625,432,0,0" TextWrapping="Wrap" Text="{Binding MotDePasse}" VerticalAlignment="Top" Width="287" Style="{DynamicResource TextBoxStyleBase}" Foreground="{x:Null}"/>
                 </Grid>
             </TabItem>
         </TabControl>

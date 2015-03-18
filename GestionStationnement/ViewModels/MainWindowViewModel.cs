@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net.Mail;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -16,6 +17,8 @@ namespace GestionStationnement.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
+        #region ConfigGeneral
+
         #region Properties
 
         private string _pendingIpAddress = "192.168.1.100";
@@ -74,6 +77,7 @@ namespace GestionStationnement.ViewModels
         }
 
         private ImageSource _planImageSource;
+        [DataMember]
         public ImageSource PlanImageSource
         {
             get { return _planImageSource; }
@@ -144,6 +148,7 @@ namespace GestionStationnement.ViewModels
         {
 
             SensorList = new ObservableCollection<Sensor>();
+            RecipientList = new ObservableCollection<string>();
             SensorList.CollectionChanged += SensorList_CollectionChanged;
             MessageHandler = new MessageHandler();
 
@@ -178,6 +183,7 @@ namespace GestionStationnement.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                if (EmailOnError) SendEmail("Gestion Stationnement : Erreur", ex.Message);
             }
         }
 
@@ -253,7 +259,8 @@ namespace GestionStationnement.ViewModels
         {
             try
             {
-                _cfgservice = new GetConfigService { SensorList = SensorList };
+                var bytes = File.ReadAllBytes(_imagePath);
+                _cfgservice = new GetConfigService { SensorList = SensorList, ImageSource = bytes};
                 DirectoryService.Start(_cfgservice);
                 _publisher = new Publisher();
                 _publisher.Connect();
@@ -263,6 +270,8 @@ namespace GestionStationnement.ViewModels
             catch (Exception ex)
             {
                 MessageHandler.SendMessage("Une erreur s'est produite : " + ex.Message);
+                if(EmailOnError)
+                    SendEmail("Gestion de Stationnement : Erreur",ex.Message);
             }
 
             
@@ -296,11 +305,33 @@ namespace GestionStationnement.ViewModels
                 {
                     if (_cancellationPending)
                         return;
-                    sensor.IsOccupied = sensor.GetStatus();
+                    try
+                    {
+                        sensor.IsOccupied = sensor.GetStatus();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageHandler.SendMessage(ex.Message);
+                        if(EmailOnError)
+                            SendEmail("Gestion de Stationnement : Erreur",ex.Message);
+                    }
                 }
                 Thread.Sleep(5000);
             }
 
+        }
+
+        public Byte[] BufferFromImage(BitmapImage imageSource)
+        {
+            var stream = imageSource.StreamSource;
+            Byte[] buffer = null;
+            if (stream == null || stream.Length <= 0) return buffer;
+            using (var br = new BinaryReader(stream))
+            {
+                buffer = br.ReadBytes((Int32)stream.Length);
+            }
+
+            return buffer;
         }
 
         #endregion
@@ -324,9 +355,25 @@ namespace GestionStationnement.ViewModels
             try
             {
                 var sensor = (Sensor)sender;
-                if (_publisher == null) return;
- _publisher.Publish(sensor.Guid, e.PropertyName,
-                                typeof (Sensor).GetProperty(e.PropertyName).GetValue(sensor).ToString());
+
+                if (e.PropertyName == "CoordinateX" || e.PropertyName == "CoordinateY" || e.PropertyName == "IsOccupied")
+                {
+                    if (_publisher == null) return;
+                    _publisher.Publish(sensor.Guid, e.PropertyName, typeof (Sensor).GetProperty(e.PropertyName).GetValue(sensor).ToString());
+                }
+
+                if (e.PropertyName == "TimeInState")
+                {
+                    var timelimit = new TimeSpan(0, Convert.ToInt32(TempsLimite), 0);
+                    if (sensor.TimeInState.CompareTo(timelimit) == 0 && sensor.IsOccupied && EmailOnTime)
+                    {
+                        var body = string.Format("La place {0} a été occupée plus longtemps que le temps limite autorisé.",sensor.FriendlyName);
+                        SendEmail("Gestion Stationnement : Alerte", body);
+                        MessageHandler.SendMessage(body);
+                    }
+
+                }
+            
 
             }
             catch (Exception ex)
@@ -338,10 +385,12 @@ namespace GestionStationnement.ViewModels
 
         #endregion
 
+        #endregion
+
         #region Alertes
 
         #region Properties
-        private string _tempsLimite;
+        private string _tempsLimite = "90";
         public string TempsLimite
         {
             get { return _tempsLimite; }
@@ -353,7 +402,7 @@ namespace GestionStationnement.ViewModels
             }
         }
 
-        private string _addresseServeur;
+        private string _addresseServeur = "smtp.gmail.com";
         public string AddresseServeur
         {
             get { return _addresseServeur; }
@@ -364,7 +413,7 @@ namespace GestionStationnement.ViewModels
                 RaisePropertyChanged(() => AddresseServeur);
             }
         }
-        private string _portServer;
+        private string _portServer = "587";
         public string PortServer
         {
             get { return _portServer; }
@@ -376,7 +425,7 @@ namespace GestionStationnement.ViewModels
             }
         }
 
-        private string _adresseSource;
+        private string _adresseSource = "wassim.hoteit.92@gmail.com";
         public string AdresseSource
         {
             get { return _adresseSource; }
@@ -423,7 +472,7 @@ namespace GestionStationnement.ViewModels
             }
         }
 
-        private bool _emailOnTime;
+        private bool _emailOnTime = true;
         public bool EmailOnTime
         {
             get { return _emailOnTime; }
@@ -456,20 +505,30 @@ namespace GestionStationnement.ViewModels
             get { return _addRecipientCommand ?? (_addRecipientCommand = new DelegateCommand(OnAddRecipient)); }
         }
 
+        private ICommand _removeRecipientCommand;
+        public ICommand RemoveRecipientCommand
+        {
+            get { return _removeRecipientCommand ?? (_removeRecipientCommand = new DelegateCommand(OnRemoveRecipient)); }
+        }
+
         #endregion
 
         #region Command Handlers
 
         public void OnAddRecipient()
         {
-            if(RecipientList == null)
-                RecipientList = new ObservableCollection<string>();
-
             if (PendingAddr == "") return;
             RecipientList.Add(PendingAddr);
             PendingAddr = string.Empty;
+        }
 
-            SendEmail("Gestion de Stationnement - Erreur","This is a test error.");
+        public void OnRemoveRecipient()
+        {
+            if (PendingAddr == "") return;
+            var rec = RecipientList.FirstOrDefault(s => s == PendingAddr);
+            if (rec != null)
+                RecipientList.Remove(rec);
+
         }
 
         private void SendEmail(string subject, string body)
@@ -477,7 +536,7 @@ namespace GestionStationnement.ViewModels
             var client = new SmtpClient
             {
                 Host = AddresseServeur,
-                Port = Convert.ToInt16(PortServer),
+                Port = Convert.ToInt32(PortServer),
                 EnableSsl = true,
                 Credentials = new System.Net.NetworkCredential(AdresseSource, MotDePasse),
                 Timeout = 15000

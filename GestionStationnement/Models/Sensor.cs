@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
+using System.Timers;
 using GestionStationnement.Helpers;
 
 namespace GestionStationnement.Models
@@ -22,7 +23,7 @@ namespace GestionStationnement.Models
         private double _coordinateX;
         private double _coordinateY;
         private TimeSpan _timeinState;
-        private readonly Stopwatch _stopwatch;
+        private readonly System.Timers.Timer _timer;
         #endregion
 
         #region Properties
@@ -114,7 +115,11 @@ namespace GestionStationnement.Models
         public TimeSpan TimeInState
         {
             get { return _timeinState; }
-            set { _timeinState = value; }
+            set
+            {
+                _timeinState = value;
+                RaisePropertyChanged(()=>TimeInState);
+            }
 
         }
 
@@ -130,10 +135,11 @@ namespace GestionStationnement.Models
         /// <param name="isOccupied"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        public Sensor(string ipAddress, string logicalId,string isOccupied, string friendlyName, string x, string y)
+        public Sensor(string ipAddress, string logicalId, string isOccupied, string friendlyName, string x, string y)
         {
-            _stopwatch = new Stopwatch();
-            _stopwatch.Start();
+            _timer = new System.Timers.Timer {Interval = 1000, Enabled = true};
+            _timer.Elapsed += TimerOnElapsed;
+        
             IpAddress = ipAddress;
             FriendlyName = friendlyName;
             LogicalId = Convert.ToInt32(logicalId);
@@ -141,6 +147,12 @@ namespace GestionStationnement.Models
             CoordinateX = Convert.ToDouble(x);
             CoordinateY = Convert.ToDouble(y);
             Guid = Guid.NewGuid();
+        }
+
+        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        {
+            TimeInState = TimeInState.Add(new TimeSpan(0, 0, 1));
+            RaisePropertyChanged(() => TimeInState);
         }
 
         /// <summary>
@@ -153,8 +165,9 @@ namespace GestionStationnement.Models
         /// <param name="y"></param>
         public Sensor(string ipAddress, int logicalId, bool isOccupied, double x, double y)
         {
-            _stopwatch = new Stopwatch();
-            _stopwatch.Start();
+            _timer = new System.Timers.Timer {Interval = 1000, Enabled = true};
+            _timer.Elapsed += TimerOnElapsed;
+            
             IpAddress = ipAddress;
             LogicalId = logicalId;
             IsOccupied = isOccupied;
@@ -186,16 +199,13 @@ namespace GestionStationnement.Models
                     if (responseStream == null) return false;
                     var reader = new StreamReader(responseStream, Encoding.UTF8);
                     var responseString = reader.ReadToEnd();
-                    if (!IsOccupied == Convert.ToBoolean(responseString))
+                    if (!IsOccupied != Convert.ToBoolean(responseString)) return Convert.ToBoolean(responseString);
+                    if(_timer.Enabled ==false)
+                        _timer.Enabled=true;
+                    else
                     {
-                        if(!_stopwatch.IsRunning ==false)
-                            _stopwatch.Start();
-                        else
-                        {
-                            _stopwatch.Restart();
-                        }
+                        TimeInState = new TimeSpan(0,0,0);
                     }
-                    TimeInState = _stopwatch.Elapsed;
                     return Convert.ToBoolean(responseString);
                 }
             }

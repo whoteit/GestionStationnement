@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GestionStationnement.Models
 {
@@ -46,17 +43,27 @@ namespace GestionStationnement.Models
     {
         [OperationContract]
         ObservableCollection<Sensor> GetSensorConfig();
+
+        [OperationContract]
+        Byte[] GetImageSource();
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, IncludeExceptionDetailInFaults = true)]
     public class GetConfigService : IGetSensorConfig
     {
         public ObservableCollection<Sensor> SensorList { get; set; }
+        public Byte[] ImageSource { get; set; }
 
         public ObservableCollection<Sensor> GetSensorConfig()
         {
             return SensorList;
         }
+
+        public Byte[] GetImageSource()
+        {
+            return ImageSource;
+        }
+
     }
 
     interface IUpdateCallback
@@ -97,6 +104,8 @@ namespace GestionStationnement.Models
 
         public void Unsubscribe()
         {
+            _serviceCallback = OperationContext.Current.GetCallbackChannel<IUpdateCallback>();
+            _callbackList.Remove(_serviceCallback);
             SensorUpdateEvent -= _updateHandler;
         }
 
